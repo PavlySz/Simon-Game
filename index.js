@@ -3,7 +3,7 @@ const colorsArray = ["red", "blue", "green", "yellow"];
 var gamePattern = [];
 var userPattern = [];
 var level = 0;
-
+var gameStarted = false;
 
 // generate a randoom number
 function nextSequence() {
@@ -103,29 +103,36 @@ function pressHandler() {
 
 // check if the sequence the user enetered is correct
 function checkAnswer(currentLevel) {
-	if (gamePattern[currentLevel] === userPattern[currentLevel]) {
-		console.log("Yes...");
-
-		if (userPattern.length === gamePattern.length) {
-			$("#level-title").text(`CONGRATULATIONS!`);
+	if (gameStarted) {
+		if (gamePattern[currentLevel] === userPattern[currentLevel]) {
+			console.log("Yes...");
+	
+			if (userPattern.length === gamePattern.length) {
+				$("#level-title").text(`CONGRATULATIONS!`);
+				setTimeout(function() {
+					nextLevel();
+				}, 1000);
+			}
+		} else {
+			console.log("Ya fooked it, mate");
+	
+			new Audio("sounds/wrong.mp3").play();
+	
+			$("body").addClass("game-over");
 			setTimeout(function() {
-				nextLevel();
-			}, 1000);
-		}
-	} else {
-		console.log("Ya fooked it, mate");
+				$("body").removeClass("game-over");
+			}, 200);
+	
+			$("#level-title").text(`YOU SUCK! Press Enter to start again`);
+			gameStarted = false;
 
-		new Audio("sounds/wrong.mp3").play();
-
-		$("body").addClass("game-over");
-		setTimeout(function() {
-			$("body").removeClass("game-over");
-		}, 200);
-
-		$("#level-title").text(`YOU FUCKING SUCK! DIE, YOU CUNT! DIE!`);
-		setTimeout(() => {
-			startGame();
-		}, 1000);
+			$(document).keypress(function (e) { 
+				if(e.key == 'Enter'){
+					gameStarted = true;
+					startGame();
+				}
+			});
+	}
 	}
 }
 
@@ -149,11 +156,11 @@ function nextLevel() {
 	for (let i = 0; i < gamePattern.length; i++) {
 		setTimeout(() => {
 			playSoundAnimation(gamePattern[i]);
-		}, 1000 * (i + 1));
+		}, 500 * (i + 1));
 	}
 
 	// checkUserInput(userPattern, gamePattern);
-	console.log("GAME PATTERN: ", gamePattern);
+	console.log("[DEBUG] GAME PATTERN: ", gamePattern);
 
 	// reset userPattern
 	userPattern = [];
@@ -183,6 +190,7 @@ function main() {
     // if the user presses Enter, start the game
 	$(document).keypress(function(e) {
 		if (e.key == "Enter") {
+			gameStarted = true;
 			startGame();
 		}
 	});
